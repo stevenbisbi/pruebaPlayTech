@@ -20,7 +20,7 @@
 
 ### 1.1 Consideraciones Importantes
 
-**MongoDB crea las colecciones automáticamente** cuando utilizas Mongoose. No necesitas ejecutar scripts SQL como en bases de datos relacionales. Los schemas definidos son suficientes para:
+**MongoDB crea las colecciones automáticamente** cuando utilizas Mongoose. Los schemas definidos son suficientes para:
 
 - Definir la estructura de los documentos
 - Aplicar validaciones
@@ -206,6 +206,7 @@ node db/seed.js
 
 # Luego ejecutar:
 npm run seed
+
 ```
 
 ---
@@ -231,27 +232,8 @@ cd backend
 npm install
 
 # 3. Configurar variables de entorno
-# Crear archivo .env en la raíz del backend
 ```
 
-**Contenido del archivo `.env`:**
-
-```env
-PORT=4000
-MONGODB_URI=mongodb://localhost:27017/inventario_ventas
-JWT_SECRET=tu_secreto_super_seguro_cambialo_en_produccion
-NODE_ENV=development
-```
-
-```bash
-# 4. (OPCIONAL) Inicializar la base de datos con datos de prueba
-node db/seed.js
-
-# 5. Iniciar el servidor
-npm run dev
-```
-
-El servidor estará corriendo en `http://localhost:4000`
 
 ### 2.3 Instalación del Frontend
 
@@ -261,64 +243,12 @@ cd frontend
 npm install
 
 # 2. Configurar variables de entorno
-# Crear archivo .env en la raíz del frontend
-```
 
-**Contenido del archivo `.env` (frontend):**
-
-```env
-VITE_API_URL=http://localhost:4000/api
-```
-
-```bash
 # 3. Iniciar la aplicación
 npm run dev
 ```
 
 La aplicación estará disponible en `http://localhost:5173`
-
-### 2.4 Estructura del Proyecto
-
-```
-pruebaplaytech/
-├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   │   └── db.js
-│   │   ├── controllers/
-│   │   │   ├── auth.controller.js
-│   │   │   ├── product.controller.js
-│   │   │   ├── sale.controller.js
-│   │   │   └── report.controller.js
-│   │   ├── middleware/
-│   │   │   ├── auth.middleware.js
-│   │   │   └── role.middleware.js
-│   │   ├── models/
-│   │   │   ├── User.js
-│   │   │   ├── Product.js
-│   │   │   ├── Sale.js
-│   │   │   ├── Report.js
-│   │   │   └── LogSesion.js
-│   │   ├── routes/
-│   │   │   ├── auth.routes.js
-│   │   │   ├── product.routes.js
-│   │   │   ├── sale.routes.js
-│   │   │   └── report.routes.js
-│   │   └── index.js
-│   ├── db/
-│   │   └── seed.js
-│   ├── .env
-│   └── package.json
-└── frontend/
-    ├── src/
-    │   ├── components/
-    │   ├── pages/
-    │   ├── context/
-    │   ├── services/
-    │   └── App.jsx
-    ├── .env
-    └── package.json
-```
 
 ---
 
@@ -372,18 +302,14 @@ El administrador tiene acceso completo a todas las funcionalidades:
 **B) Módulo de Caja**
 
 - Acceso completo al módulo de ventas
-- Registrar ventas como un cajero
 
 **C) Reportes de Ventas**
 
 - **Ver reportes diarios:**
 
-  - Navegar a "Reportes"
-  - Seleccionar fecha
   - Ver resumen de transacciones
 
 - **Exportar reportes:**
-  - Formato CSV: descarga archivo con extensión .csv
   - Formato PDF: genera documento PDF con diseño profesional
 
 **D) Gestión de Usuarios**
@@ -472,22 +398,11 @@ El cajero tiene acceso limitado:
 
 1. **Acceder a reportes:**
 
-   - Menu → "Reportes"
+    "Ingresos hoy"
 
-2. **Seleccionar período:**
+2. ** Click en "Descargar PDF**
 
-   - Fecha específica o rango de fechas
-   - Clic en "Generar Reporte"
-
-3. **Visualizar datos:**
-
-   - Número total de transacciones
-   - Lista de productos vendidos
-   - Cantidad por producto
-   - Total de ingresos del día
-
-4. **Exportar:**
-   - **CSV:** archivo para Excel/hojas de cálculo
+3. **Exportar:**
    - **PDF:** documento imprimible con formato profesional
 
 ### 3.5 Cierre de Sesión
@@ -501,28 +416,7 @@ El cajero tiene acceso limitado:
 
 ## 4. Ejemplos de Reportes
 
-### 4.1 Reporte en Formato CSV
-
-```csv
-Reporte de Ventas - 04/10/2025
-
-Resumen General
-Número de Transacciones,15
-Total de Ingresos,$450000
-
-Detalle de Productos Vendidos
-Código,Producto,Cantidad Vendida,Precio Unitario,Total
-PROD001,Arroz,25,$2500,$62500
-PROD002,Azúcar,18,$2000,$36000
-PROD003,Aceite,12,$5000,$60000
-PROD005,Café,20,$8000,$160000
-PROD006,Leche,30,$3500,$105000
-PROD010,Atún,15,$4500,$67500
-
-Total General:,$450000
-```
-
-### 4.2 Reporte en Formato PDF
+### 4.2 Reporte en Formato PDF / o Abrir archivo PDF reporte_diario.pdf
 
 El reporte PDF incluye:
 
@@ -567,86 +461,38 @@ Tabla con columnas:
 ### Autenticación
 
 ```
-POST /api/auth/login
-POST /api/auth/logout
-GET  /api/auth/verify
+POST /api/v1/auth/login
+POST /api/v1/auth/logout
+GET  /api/v1/auth/profile
 ```
 
 ### Productos
 
 ```
-GET    /api/products          (Todos los usuarios)
-GET    /api/products/:id      (Todos los usuarios)
-POST   /api/products          (Solo administrador)
-PUT    /api/products/:id      (Solo administrador)
-DELETE /api/products/:id      (Solo administrador)
+GET    /api/v1/products          (Todos los usuarios)
+GET    /api/v1/products/:id      (Todos los usuarios)
+POST   /api/v1/products          (Solo administrador)
+PUT    /api/v1/products/:id      (Solo administrador)
+DELETE /api/v1/products/:id      (Solo administrador)
 ```
 
 ### Ventas
 
 ```
-GET  /api/sales               (Solo administrador)
-GET  /api/sales/:id           (Cajero: solo sus ventas)
-POST /api/sales               (Todos los usuarios autenticados)
+GET  /api/v1/sales               (Solo administrador)
+GET  /api/v1/sales/:id           (Cajero: solo sus ventas)
+POST /api/v1/sales               (Todos los usuarios autenticados)
 ```
 
 ### Reportes
 
 ```
-GET  /api/reports             (Solo administrador)
 GET  /api/reports/daily       (Solo administrador)
-POST /api/reports/export/csv  (Solo administrador)
-POST /api/reports/export/pdf  (Solo administrador)
 ```
 
 ---
 
-## 6. Solución de Problemas
-
-### Error de conexión a MongoDB
-
-```bash
-# Verificar que MongoDB esté corriendo
-sudo systemctl status mongod  # Linux
-brew services list | grep mongodb  # macOS
-
-# Reiniciar MongoDB
-sudo systemctl restart mongod  # Linux
-brew services restart mongodb-community  # macOS
-```
-
-### Error de autenticación
-
-- Verificar credenciales
-- Ejecutar script de seed nuevamente
-- Revisar token JWT en localStorage (herramientas del navegador)
-
-### Stock insuficiente
-
-- El sistema no permite ventas con stock insuficiente
-- Administrador debe actualizar inventario
-
-### Puertos en uso
-
-```bash
-# Cambiar puerto en .env
-PORT=4001  # Backend
-VITE_PORT=5174  # Frontend
-```
-
-### Variables de entorno no cargadas
-
-```bash
-# Verificar que los archivos .env existan
-ls -la backend/.env
-ls -la frontend/.env
-
-# Reiniciar los servidores después de crear/modificar .env
-```
-
----
-
-## 7. Seguridad
+## 6. Seguridad
 
 - Contraseñas encriptadas con bcryptjs
 - Tokens JWT con expiración
@@ -658,7 +504,7 @@ ls -la frontend/.env
 
 ---
 
-## 8. Notas Adicionales
+## 7. Notas Adicionales
 
 ### MongoDB Atlas (Alternativa Cloud)
 
@@ -673,31 +519,6 @@ Si prefieres usar MongoDB Atlas en lugar de instalación local:
 MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/inventario_ventas
 ```
 
-### Despliegue en Producción
-
-**Backend:**
-
-- Heroku, Railway, Render, DigitalOcean
-- Configurar variables de entorno en el hosting
-- Usar MongoDB Atlas para la base de datos
-
-**Frontend:**
-
-- Vercel, Netlify, GitHub Pages
-- Configurar VITE_API_URL con la URL del backend en producción
-
----
-
-## 9. Contacto y Soporte
-
-Para problemas técnicos o consultas:
-
-- Revisar logs del servidor: `backend/logs/`
-- Verificar consola del navegador (F12)
-- Consultar documentación de MongoDB
-- Revisar la consola del terminal para errores del backend
-
----
 
 **Versión:** 1.0  
 **Última actualización:** Octubre 2025  
