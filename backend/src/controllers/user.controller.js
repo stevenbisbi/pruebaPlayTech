@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import bcrypt from "bcryptjs";
 
 // Todos los usuarios (solo admin)
 export const getUsers = async (req, res) => {
@@ -29,19 +30,31 @@ export const getUser = async (req, res) => {
   }
 };
 
-// Actualizar usuario
 export const updateUser = async (req, res) => {
   try {
     if (req.user.role !== "administrador" && req.user.id !== req.params.id)
       return res.status(403).json({ message: "Acceso denegado" });
 
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+    const updateData = { ...req.body };
+
+    // Solo actualizar contraseña si viene no vacía
+    if (updateData.password) {
+      const hashedPassword = await bcrypt.hash(updateData.password, 10);
+      updateData.password = hashedPassword;
+    } else {
+      delete updateData.password;
+    }
+
+    const user = await User.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
     });
+
     if (!user)
       return res.status(404).json({ message: "Usuario no encontrado" });
+
     res.json(user);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
