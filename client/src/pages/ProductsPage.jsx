@@ -1,12 +1,7 @@
-import {
-  getAllProducts,
-  updateProduct,
-  deleteProduct,
-} from "../services/product.api.js";
+import { getAllProducts, deleteProduct } from "../services/product.api.js";
 import { useFetch } from "../hooks/useFetch.js";
-import { Spinner, Alert, Row, Col, Button } from "react-bootstrap";
+import { Spinner, Alert, Row, Col, Button, Container } from "react-bootstrap";
 import { ProductCard } from "../components/products/ProductCard";
-import { ProductModal } from "../components/products/ProductModal.jsx";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -22,22 +17,22 @@ export function ProductsPage() {
     if (!confirmDelete) return;
 
     try {
-      console.log(product._id);
       await deleteProduct(product._id, { user: user._id });
       alert("Producto eliminado");
-      productFetch.triggerReload(); // Refresca la lista
+      productFetch.triggerReload();
     } catch (error) {
       console.error(error);
       alert("Error al eliminar el producto");
     }
   };
+
   const onEdit = (product) => {
     navigate(`/admin/product/edit/${product._id}`);
   };
 
   if (productFetch.loading) {
     return (
-      <div className="text-center  m-5">
+      <div className="text-center mt-5">
         <Spinner
           animation="grow"
           role="status"
@@ -50,40 +45,31 @@ export function ProductsPage() {
 
   if (productFetch.error) {
     return (
-      <div className="text-center m-5">
-        <Alert variant="danger">{productFetch.error}</Alert>;
+      <div className="text-center mt-5">
+        <Alert variant="danger">{productFetch.error}</Alert>
       </div>
     );
   }
-  return (
-    <div className="container-fluid p-4">
-      <h1 className="text-center mb-4">Inventario</h1>
-      <Button
-        variant="success"
-        size="sm"
-        onClick={() => navigate("/admin/product/create")}
-      >
-        crear producto
-      </Button>
-      <Row className="g-4">
-        {productFetch.data.map((item) => {
-          return (
-            <Col xs={6} sm={4} md={2} key={item._id}>
-              <ProductCard item={item} onEdit={onEdit} onDelete={onDelete} />
-            </Col>
-          );
-        })}
-      </Row>
 
-      <ProductModal
-        selectedItem={productFetch.data.find(
-          (p) => p._id === productFetch.selectedDataId
-        )}
-        show={!!productFetch.selectedDataId}
-        handleClose={() => productFetch.setSelectedDataId(null)}
-        onAddToCart={(cartItem) => console.log(cartItem)}
-      />
-      {/* Puedes usar selectedDataId para un modal */}
-    </div>
+  return (
+    <Container className="py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1>Inventario</h1>
+        <Button
+          variant="success"
+          onClick={() => navigate("/admin/product/create")}
+        >
+          Crear producto
+        </Button>
+      </div>
+
+      <Row className="g-4">
+        {productFetch.data.map((item) => (
+          <Col xs={12} sm={6} md={4} lg={3} key={item._id}>
+            <ProductCard item={item} onEdit={onEdit} onDelete={onDelete} />
+          </Col>
+        ))}
+      </Row>
+    </Container>
   );
 }

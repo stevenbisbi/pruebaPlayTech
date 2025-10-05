@@ -1,63 +1,58 @@
-import { createContext, useState, useContext } from "react";
-import { register } from "../services/auth.api";
-import PropTypes from "prop-types";
+// src/context/AuthContext.jsx
+import { createContext, useContext, useState, useEffect } from "react";
+import { verifyToken, logout as logoutApi } from "../services/auth.api";
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // aquí guardaremos username, id y role
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [errors, setErrors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const signup = async (userData) => {
-    try {
-      const res = await register(userData); // backend debería devolver id, username y role
-      console.log(res.data);
-      // guardar el usuario completo con role
-      setUser({
-        id: res.data.id,
-        username: res.data.username,
-        role: res.data.role, // <--- asegurarse de que venga del backend
-      });
-      setIsAuthenticated(true);
-    } catch (error) {
-      console.log(error);
-      console.log(error.response?.data?.message);
-      setErrors(error.response?.data?.message || ["Error en el registro"]);
-    }
-  };
-
-  // ✅ Función de login
+  // 🔹 Llamar esto cuando el usuario hace login
   const login = (userData) => {
-    setUser({
-      id: userData.id,
-      username: userData.username,
-      role: userData.role,
-    });
+    setUser(userData);
     setIsAuthenticated(true);
   };
+
+  // 🔹 Cerrar sesión
+  const logout = async () => {
+    await logoutApi();
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
+  // 🔹 Verificar token cuando se recarga la página
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const res = await verifyToken(); // hace GET /profile
+        setUser(res.data);
+        setIsAuthenticated(true);
+      } catch (error) {
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkLogin();
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
-        signup,
-        login,
         user,
         isAuthenticated,
-        errors,
+        loading,
+        login,
+        logout,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-};
-
-AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
+}

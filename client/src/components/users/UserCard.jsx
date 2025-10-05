@@ -1,28 +1,29 @@
 import { Card, Button, Badge } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext.jsx";
 
-export function ProductCard({ item, onEdit, onDelete }) {
+export function UserCard({ userItem, onEdit, onDelete }) {
   const { user } = useAuth();
-  if (!item) return null;
+  if (!userItem) return null;
 
   const isAdmin = user?.role === "administrador";
 
   return (
     <Card className="h-100 shadow-sm border-0" style={{ minWidth: "14rem" }}>
       <Card.Body className="d-flex flex-column">
-        <Card.Title className="mb-2">{item.name}</Card.Title>
+        <Card.Title className="mb-2">{userItem.username}</Card.Title>
 
         <div className="mb-2">
-          <Badge bg="secondary" className="me-1">
-            Code: {item.code || "N/A"}
+          <Badge bg="primary" className="me-1">
+            Rol: {userItem.role}
           </Badge>
-          <Badge bg={item.stock > 20 ? "success" : "danger"}>
-            Stock: {item.stock || 0}
-          </Badge>
+          <Badge bg="secondary">Login: {userItem.loginAttempts || 0}</Badge>
         </div>
 
-        <Card.Text className="text-truncate mb-3" title={item.description}>
-          {item.description || "Sin descripción"}
+        <Card.Text className="text-truncate mb-3" title={userItem.updatedAt}>
+          Último login:{" "}
+          {userItem.updatedAt
+            ? new Date(userItem.updatedAt).toLocaleString()
+            : "N/A"}
         </Card.Text>
 
         {isAdmin && (
@@ -30,7 +31,7 @@ export function ProductCard({ item, onEdit, onDelete }) {
             <Button
               variant="warning"
               size="sm"
-              onClick={() => onEdit?.(item)}
+              onClick={() => onEdit?.(userItem)}
               className="me-1 flex-fill"
             >
               Editar
@@ -38,7 +39,7 @@ export function ProductCard({ item, onEdit, onDelete }) {
             <Button
               variant="danger"
               size="sm"
-              onClick={() => onDelete?.(item)}
+              onClick={() => onDelete?.(userItem)}
               className="flex-fill"
             >
               Eliminar

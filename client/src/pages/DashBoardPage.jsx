@@ -237,7 +237,7 @@ export const DashBoardPage = () => {
         </Col>
 
         <Col xs={12} md={6} lg={3} className="mb-3">
-          <Card className="h-100 border-0 shadow-sm">
+          <Card className="h-100 border-0 shadow-sm card-bg">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>
@@ -251,7 +251,7 @@ export const DashBoardPage = () => {
               </div>
               <Button
                 as={Link}
-                to="/pos"
+                to="/admin/reports"
                 variant="link"
                 size="sm"
                 className="p-0 text-decoration-none text-success"
@@ -277,16 +277,6 @@ export const DashBoardPage = () => {
                 </div>
                 <div style={{ fontSize: "3rem" }}>💰</div>
               </div>
-              <Button
-                as={Link}
-                to="/admin/reports"
-                variant="link"
-                size="sm"
-                className="p-0 text-decoration-none"
-                style={{ color: "#6f42c1" }}
-              >
-                Ver reportes →
-              </Button>
               <div className="d-flex gap-2 mt-2">
                 <Button
                   variant="outline-success"
@@ -294,13 +284,6 @@ export const DashBoardPage = () => {
                   onClick={() => handleDownloadReport("pdf")}
                 >
                   Descargar PDF
-                </Button>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  onClick={() => handleDownloadReport("csv")}
-                >
-                  Descargar CSV
                 </Button>
               </div>
             </Card.Body>

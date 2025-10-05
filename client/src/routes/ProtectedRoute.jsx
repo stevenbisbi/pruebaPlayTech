@@ -4,8 +4,7 @@ import { useAuth } from "../context/AuthContext";
 export function ProtectedRoute({ roles }) {
   const { user } = useAuth();
 
-  // Si no hay usuario logueado, redirigir a login
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
 
   // Si hay roles específicos y el rol del usuario no está incluido
   if (roles && (!user.role || !roles.includes(user.role)))

@@ -169,7 +169,7 @@ const POSPage = () => {
     }) || [];
 
   return (
-    <Container fluid>
+    <Container fluid className="mt-5">
       <Row>
         {/* Panel de Productos */}
         <Col lg={8} className="mb-4">

@@ -1,8 +1,8 @@
 // src/components/auth/LoginPage.jsx
-import { useState } from "react";
-import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { Form, Button, Container, Card, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../services/auth.api"; // tu API de login
+import { loginUser } from "../../services/auth.api";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 
@@ -12,7 +12,15 @@ export function LoginPage() {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && isAuthenticated && user) {
+      if (user.role === "administrador") navigate("/admin/dashboard");
+      else if (user.role === "cajero") navigate("/staff/dashboard");
+      else navigate("/");
+    }
+  }, [isAuthenticated, user, loading, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,22 +28,14 @@ export function LoginPage() {
 
     try {
       const res = await loginUser({ username, password });
-
-      // Backend devuelve directamente el usuario con su rol
       const data = res.data;
-      console.log("Respuesta login backend:", data);
-
-      // Guardamos el usuario en el contexto
       login(data);
-
       toast.success("Inicio de sesión exitoso");
 
-      // Redirigir según rol
       if (data.role === "administrador") navigate("/admin/dashboard");
       else if (data.role === "cajero") navigate("/staff/dashboard");
-      else navigate("/"); // fallback
+      else navigate("/");
     } catch (err) {
-      console.error("Error durante el inicio de sesión:", err);
       const message =
         err.response?.data?.message || "Error en el inicio de sesión";
       setError(message);
@@ -43,11 +43,31 @@ export function LoginPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <Container className="d-flex justify-content-center align-items-center vh-100">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Cargando...</span>
+          </div>
+          <p className="mt-3">Verificando sesión...</p>
+        </div>
+      </Container>
+    );
+  }
+
   return (
     <Container className="d-flex justify-content-center align-items-center vh-100">
-      <Row className="w-100">
-        <Col md={{ span: 6, offset: 3 }}>
-          <h2 className="text-center mb-4">Iniciar Sesión</h2>
+      <Card
+        style={{
+          width: "100%",
+          maxWidth: "400px",
+          padding: "20px",
+          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+        }}
+      >
+        <Card.Body>
+          <h3 className="text-center mb-4">Iniciar Sesión</h3>
 
           {error && <Alert variant="danger">{error}</Alert>}
 
@@ -76,14 +96,12 @@ export function LoginPage() {
               />
             </Form.Group>
 
-            <div className="d-grid">
-              <Button variant="primary" type="submit">
-                Iniciar Sesión
-              </Button>
-            </div>
+            <Button variant="primary" type="submit" className="w-100">
+              Iniciar Sesión
+            </Button>
           </Form>
-        </Col>
-      </Row>
+        </Card.Body>
+      </Card>
     </Container>
   );
 }
