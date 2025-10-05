@@ -203,9 +203,6 @@ node db/seed.js
   "dev": "nodemon src/index.js",
   "seed": "node db/seed.js"
 }
-
-# Luego ejecutar:
-npm run seed
 ```
 
 ---
