@@ -1,20 +1,9 @@
-// src/pages/Dashboard.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Badge,
-  Button,
-  Spinner,
-} from "react-bootstrap";
+import { useNavigate, Link } from "react-router-dom";
+import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 
-import { downloadDailyReport } from "../services/report.api"; // importa la nueva función
-
+import { downloadDailyReport } from "../services/report.api";
 import { getAllProducts } from "../services/product.api";
 import { getAllSales } from "../services/sale.api";
 import { useAuth } from "../context/AuthContext";
@@ -25,22 +14,53 @@ export const DashBoardPage = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalProducts: 0,
-    activeProducts: 0,
-    lowStock: 0,
     todaySales: 0,
     todayRevenue: 0,
-    weekRevenue: 0,
-    monthRevenue: 0,
   });
-  const [recentSales, setRecentSales] = useState([]);
-  const [topProducts, setTopProducts] = useState([]);
-  const [lowStockProducts, setLowStockProducts] = useState([]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const [productsRes, salesRes] = await Promise.all([
+        getAllProducts(),
+        getAllSales(),
+      ]);
+      const products = productsRes.data;
+      const sales = salesRes.data;
+
+      const today = new Date();
+      const start = new Date(today.setHours(0, 0, 0, 0));
+      const end = new Date(today.setHours(23, 59, 59, 999));
+
+      const todaySalesArr = sales.filter((s) => {
+        const saleDate = new Date(s.createdAt); // <--- usar createdAt
+        return saleDate >= start && saleDate <= end;
+      });
+      console.log(todaySalesArr);
+
+      const todayRevenue = todaySalesArr.reduce(
+        (sum, s) => sum + (s.totalGeneral || 0),
+        0
+      );
+
+      setStats({
+        totalProducts: products.length,
+        todaySales: todaySalesArr.length,
+        todayRevenue,
+      });
+    } catch (error) {
+      console.error("Error al cargar dashboard:", error);
+      toast.error("Error cargando datos del dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDownloadReport = async (format) => {
     try {
@@ -56,106 +76,31 @@ export const DashBoardPage = () => {
       link.click();
       toast.success(`Reporte ${format.toUpperCase()} descargado`);
     } catch (err) {
-      toast.error("Error al generar el reporte");
       console.error(err);
+      toast.error("Error al generar el reporte");
     }
   };
 
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    try {
-      const [productsRes, salesRes] = await Promise.all([
-        getAllProducts(),
-        getAllSales(),
-      ]);
-
-      // Asegurar que siempre sean arrays
-      const products = Array.isArray(productsRes.data?.data)
-        ? productsRes.data.data
-        : [];
-      const allSales = Array.isArray(salesRes.data?.data)
-        ? salesRes.data.data
-        : [];
-
-      const lowStockItems = products.filter((p) => p.stock < 20 && p.isActive);
-      const activeProducts = products.filter((p) => p.isActive);
-
-      const now = new Date();
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-      const weekSales = allSales.filter((s) => new Date(s.saleDate) >= weekAgo);
-      const monthSales = allSales.filter(
-        (s) => new Date(s.saleDate) >= monthAgo
-      );
-
-      const weekRevenue = weekSales.reduce((sum, s) => sum + s.totalAmount, 0);
-      const monthRevenue = monthSales.reduce(
-        (sum, s) => sum + s.totalAmount,
-        0
-      );
-
-      const recent = allSales.slice(0, 5);
-
-      const topSelling = allSales
-        .flatMap((s) => s.items)
-        .reduce((acc, item) => {
-          acc[item.sku] = acc[item.sku] || {
-            name: item.name,
-            quantity: 0,
-            revenue: 0,
-          };
-          acc[item.sku].quantity += item.quantity;
-          acc[item.sku].revenue += item.price * item.quantity;
-          return acc;
-        }, {});
-
-      const topProductsSorted = Object.values(topSelling)
-        .sort((a, b) => b.quantity - a.quantity)
-        .slice(0, 5);
-
-      setStats({
-        totalProducts: products.length,
-        activeProducts: activeProducts.length,
-        lowStock: lowStockItems.length,
-        todaySales: allSales.length,
-        todayRevenue: allSales.reduce((sum, s) => sum + s.totalAmount, 0),
-        weekRevenue,
-        monthRevenue,
-      });
-
-      setRecentSales(recent);
-      setTopProducts(topProductsSorted);
-      setLowStockProducts(lowStockItems);
-    } catch (error) {
-      console.error("Error al cargar dashboard:", error);
-    } finally {
-      setLoading(false);
-    }
+  const handleLogout = () => {
+    logout();
+    localStorage.removeItem("user");
+    navigate("/", { replace: true });
+    toast.success("Sesión cerrada exitosamente");
   };
 
   if (loading) {
     return (
-      <Container className="mt-5">
-        <div className="text-center">
-          <Spinner animation="border" variant="primary" />
-          <p className="mt-3">Cargando dashboard...</p>
-        </div>
+      <Container className="mt-5 text-center">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-3">Cargando dashboard...</p>
       </Container>
     );
   }
 
-  const handleLogout = () => {
-    logout(); // limpia el contexto
-    localStorage.removeItem("user"); // borra el usuario almacenado
-    navigate("/", { replace: true }); // redirige al login
-    toast.success("Sesión cerrada exitosamente");
-  };
-
   return (
     <Container fluid className="py-4">
       <Card className="mb-4 border-0 shadow-sm bg-primary text-white">
-        <Card.Body className="p-4 d-flex justify-content-between align-items-end">
+        <Card.Body className="d-flex justify-content-between align-items-end">
           <div>
             <h1 className="display-5 mb-2">
               ¡Bienvenido, {user?.username}! 👋
@@ -174,11 +119,9 @@ export const DashBoardPage = () => {
               })}
             </small>
           </div>
-          <div className=" gap-4">
-            <Button variant="danger" size="sm" onClick={handleLogout}>
-              Cerrar sesión
-            </Button>
-          </div>
+          <Button variant="danger" size="sm" onClick={handleLogout}>
+            Cerrar sesión
+          </Button>
         </Card.Body>
       </Card>
 
@@ -192,9 +135,7 @@ export const DashBoardPage = () => {
                     Inventario
                   </Card.Subtitle>
                   <h2 className="mb-0 text-primary">{stats.totalProducts}</h2>
-                  <small className="text-muted">
-                    {stats.activeProducts} activos
-                  </small>
+                  <small className="text-muted">Total de productos</small>
                 </div>
                 <div style={{ fontSize: "3rem" }}>📦</div>
               </div>
@@ -230,7 +171,7 @@ export const DashBoardPage = () => {
                     Ver usuarios →
                   </Button>
                 </div>
-                <div style={{ fontSize: "3rem" }}>⚠️</div>
+                <div style={{ fontSize: "3rem" }}>👥</div>
               </div>
             </Card.Body>
           </Card>
@@ -242,10 +183,10 @@ export const DashBoardPage = () => {
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>
                   <Card.Subtitle className="text-muted mb-2">
-                    Ventas Hoy
+                    Ventas
                   </Card.Subtitle>
                   <h2 className="mb-0 text-success">{stats.todaySales}</h2>
-                  <small className="text-muted">Transacciones</small>
+                  <small className="text-muted">Transacciones hoy</small>
                 </div>
                 <div style={{ fontSize: "3rem" }}>🛒</div>
               </div>
@@ -271,21 +212,22 @@ export const DashBoardPage = () => {
                     Ingresos Hoy
                   </Card.Subtitle>
                   <h2 className="mb-0" style={{ color: "#6f42c1" }}>
-                    ${stats.todayRevenue.toFixed(2)}
+                    {new Intl.NumberFormat("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                      maximumFractionDigits: 0,
+                    }).format(stats.todayRevenue)}
                   </h2>
-                  <small className="text-muted">Efectivo recaudado</small>
                 </div>
                 <div style={{ fontSize: "3rem" }}>💰</div>
               </div>
-              <div className="d-flex gap-2 mt-2">
-                <Button
-                  variant="outline-success"
-                  size="sm"
-                  onClick={() => handleDownloadReport("pdf")}
-                >
-                  Descargar PDF
-                </Button>
-              </div>
+              <Button
+                variant="outline-success"
+                size="sm"
+                onClick={() => handleDownloadReport("pdf")}
+              >
+                Descargar PDF
+              </Button>
             </Card.Body>
           </Card>
         </Col>

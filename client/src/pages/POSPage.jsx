@@ -22,7 +22,7 @@ import { useAuth } from "../context/AuthContext";
 import { getAllSales } from "../services/sale.api";
 
 const POSPage = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,11 +38,17 @@ const POSPage = () => {
   const fetchProducts = async () => {
     try {
       const response = await getAllProducts();
-      console.log(response.data);
       setProducts(response.data);
     } catch (error) {
       toast.error("Error al cargar productos");
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    localStorage.removeItem("user");
+    navigate("/", { replace: true });
+    toast.success("Sesión cerrada exitosamente");
   };
 
   // Agregar producto al carrito
@@ -79,6 +85,13 @@ const POSPage = () => {
     setCart(cart.filter((item) => item._id !== productId));
     toast.info("Producto eliminado del carrito");
   };
+
+  const cop = (number) =>
+    new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      maximumFractionDigits: 0,
+    }).format(number);
 
   // Actualizar cantidad
   const updateQuantity = (productId, newQuantity) => {
@@ -150,7 +163,6 @@ const POSPage = () => {
       setCart([]);
       fetchProducts();
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.message || "Error al procesar venta");
     } finally {
       setProcessingPayment(false);
@@ -161,10 +173,10 @@ const POSPage = () => {
   const filteredProducts =
     products?.filter((p) => {
       const name = p?.name?.toLowerCase() || "";
-      const sku = p?.sku?.toLowerCase() || "";
+      const code = p?.code?.toLowerCase() || "";
       return (
         name.includes(searchTerm.toLowerCase()) ||
-        sku.includes(searchTerm.toLowerCase())
+        code.includes(searchTerm.toLowerCase())
       );
     }) || [];
 
@@ -183,7 +195,7 @@ const POSPage = () => {
                 <InputGroup.Text>🔍</InputGroup.Text>
                 <Form.Control
                   type="text"
-                  placeholder="Buscar por nombre o SKU..."
+                  placeholder="Buscar por nombre o sku..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   autoFocus
@@ -246,12 +258,12 @@ const POSPage = () => {
                           </div>
 
                           <small className="text-muted d-block mb-2">
-                            {product.sku}
+                            {product.code}
                           </small>
 
                           <div className="d-flex justify-content-between align-items-center">
                             <h5 className="mb-0 text-primary">
-                              ${product.price.toFixed(2)}
+                              {cop(product.price)}
                             </h5>
                             <Badge
                               bg={
@@ -321,7 +333,7 @@ const POSPage = () => {
                           <div className="flex-grow-1">
                             <h6 className="mb-1">{item.name}</h6>
                             <small className="text-muted">
-                              ${item.price.toFixed(2)} c/u
+                              {cop(item.price)}
                             </small>
                           </div>
                           <Button
@@ -367,7 +379,7 @@ const POSPage = () => {
                           </InputGroup>
 
                           <h6 className="mb-0 text-success">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            {cop(item.price * item.quantity)}
                           </h6>
                         </div>
 
@@ -388,7 +400,7 @@ const POSPage = () => {
                   <div className="border-top p-3 bg-light">
                     <div className="d-flex justify-content-between mb-2">
                       <span>Subtotal:</span>
-                      <strong>${calculateSubtotal().toFixed(2)}</strong>
+                      <strong>{cop(calculateSubtotal())}</strong>
                     </div>
                     <div className="d-flex justify-content-between mb-2">
                       <span>Items:</span>
@@ -400,7 +412,7 @@ const POSPage = () => {
                     <div className="d-flex justify-content-between">
                       <h5 className="mb-0">TOTAL:</h5>
                       <h4 className="mb-0 text-success">
-                        ${calculateTotal().toFixed(2)}
+                        {cop(calculateTotal())}
                       </h4>
                     </div>
                   </div>
@@ -445,7 +457,8 @@ const POSPage = () => {
 
             {/* Info del cajero */}
             <Card.Footer className="text-muted small">
-              <div className="d-flex justify-content-between align-items-center">
+              {/* Primera fila: cajero y hora */}
+              <div className="d-flex justify-content-between mb-1">
                 <span>
                   👤 Cajero: <strong>{user?.username}</strong>
                 </span>
@@ -455,6 +468,17 @@ const POSPage = () => {
                     minute: "2-digit",
                   })}
                 </span>
+              </div>
+
+              {/* Segunda fila: botón logout a la derecha */}
+              <div className="d-flex justify-content-end">
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={handleLogout}
+                >
+                  Cerrar sesión
+                </Button>
               </div>
             </Card.Footer>
           </Card>
@@ -483,11 +507,11 @@ const POSPage = () => {
                   <strong>{item.name}</strong>
                   <br />
                   <small className="text-muted">
-                    {item.quantity} x ${item.price.toFixed(2)}
+                    {item.quantity} x {cop(item.price)}
                   </small>
                 </div>
                 <strong className="text-success">
-                  ${(item.quantity * item.price).toFixed(2)}
+                  {cop(item.quantity * item.price)}
                 </strong>
               </ListGroup.Item>
             ))}
@@ -503,7 +527,11 @@ const POSPage = () => {
             <div className="d-flex justify-content-between">
               <h5 className="mb-0">Total a Pagar:</h5>
               <h4 className="mb-0 text-success">
-                ${calculateTotal().toFixed(2)}
+                {new Intl.NumberFormat("es-CO", {
+                  style: "currency",
+                  currency: "COP",
+                  maximumFractionDigits: 0,
+                }).format(calculateTotal())}
               </h4>
             </div>
           </div>
@@ -527,21 +555,6 @@ const POSPage = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      {/* Estilos adicionales */}
-      <style jsx>{`
-        .hover-shadow:hover {
-          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-          transform: translateY(-2px);
-        }
-        .product-card {
-          transition: all 0.2s ease;
-        }
-        .sticky-top {
-          position: sticky;
-          z-index: 1020;
-        }
-      `}</style>
     </Container>
   );
 };

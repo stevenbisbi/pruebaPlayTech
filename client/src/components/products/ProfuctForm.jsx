@@ -1,14 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  Form,
-  Button,
-  Container,
-  Row,
-  Col,
-  Card,
-  Spinner,
-} from "react-bootstrap";
+import { Form, Button, Container, Card, Spinner } from "react-bootstrap";
 import {
   createProduct,
   updateProduct,
