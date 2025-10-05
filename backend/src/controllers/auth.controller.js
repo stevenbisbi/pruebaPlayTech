@@ -16,17 +16,6 @@ export const register = async (req, res) => {
     const newUser = new User({ username, password: hashedPassword, role });
 
     const userSaved = await newUser.save();
-    const token = await createJwtToken({
-      id: userSaved._id,
-      role: userSaved.role,
-    });
-
-    res.cookie("token", token, {
-      httpOnly: true, // el frontend no puede acceder directamente
-      secure: true,
-      sameSite: "none", // necesario si tu frontend y backend están en dominios distintos
-    });
-
     res.json({
       id: userSaved._id,
       username: userSaved.username,

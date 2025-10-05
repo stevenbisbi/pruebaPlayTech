@@ -44,16 +44,6 @@ export function RegisterPage() {
     }
   }, [id, reset]);
 
-  useEffect(() => {
-    if (loggedUser) {
-      navigate(
-        loggedUser.role === "administrador"
-          ? "/admin/dashboard"
-          : "/staff/dashboard"
-      );
-    }
-  }, [loggedUser, navigate]);
-
   const onSubmit = handleSubmit(async (data) => {
     try {
       if (id) await updateUser(id, data);

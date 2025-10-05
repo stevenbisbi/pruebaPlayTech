@@ -42,7 +42,6 @@ export const DashBoardPage = () => {
         const saleDate = new Date(s.createdAt); // <--- usar createdAt
         return saleDate >= start && saleDate <= end;
       });
-      console.log(todaySalesArr);
 
       const todayRevenue = todaySalesArr.reduce(
         (sum, s) => sum + (s.totalGeneral || 0),

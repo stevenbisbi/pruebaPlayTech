@@ -2,14 +2,6 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    sku: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      minlength: [3, "El codigo deber ser de almenos 3 caracteres"],
-    },
-
     username: {
       type: String,
       required: true,
