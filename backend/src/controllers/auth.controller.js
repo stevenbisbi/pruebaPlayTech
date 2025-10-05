@@ -23,7 +23,7 @@ export const register = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true, // el frontend no puede acceder directamente
-      secure: process.env.NODE_ENV === "production", // solo HTTPS en producción
+      secure: true,
       sameSite: "none", // necesario si tu frontend y backend están en dominios distintos
     });
 
@@ -76,7 +76,11 @@ export const login = async (req, res) => {
       role: userFound.role,
     });
 
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true, // el frontend no puede acceder directamente
+      secure: true, // solo HTTPS en producción
+      sameSite: "none", // necesario si tu frontend y backend están en dominios distintos
+    });
     res.json({
       id: userFound._id,
       username: userFound.username,
@@ -91,8 +95,17 @@ export const logout = (req, res) => {
   return res.sendStatus(200);
 };
 export const profile = async (req, res) => {
-  const userFound = await User.findById(req.user.id);
-  if (!userFound)
-    return res.sendStatus(400).json({ message: "User not found" });
-  res.send("profile");
+  try {
+    const userFound = await User.findById(req.user.id);
+    if (!userFound)
+      return res.status(404).json({ message: "Usuario no encontrado" });
+
+    res.json({
+      id: userFound._id,
+      username: userFound.username,
+      role: userFound.role,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error en el servidor" });
+  }
 };
