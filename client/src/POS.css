@@ -1,0 +1,16 @@
+/* Efecto de sombra al pasar el cursor */
+.hover-shadow:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px);
+}
+
+/* Transición suave en las tarjetas */
+.product-card {
+  transition: all 0.2s ease;
+}
+
+/* Mantiene el carrito fijo mientras se hace scroll */
+.sticky-top {
+  position: sticky;
+  z-index: 1020;
+}
