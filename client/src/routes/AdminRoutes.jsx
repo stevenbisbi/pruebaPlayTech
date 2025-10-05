@@ -32,6 +32,9 @@ export default function AdminRoutes() {
       <Route element={<ProtectedRoute roles={["administrador"]} />}>
         <Route path="users" element={<UsersPages />} />
       </Route>
+      <Route element={<ProtectedRoute roles={["administrador"]} />}>
+        <Route path="user/edit/:id" element={<RegisterPage />} />
+      </Route>
     </Routes>
   );
 }

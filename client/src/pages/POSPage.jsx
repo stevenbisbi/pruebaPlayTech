@@ -19,17 +19,15 @@ import { toast } from "react-hot-toast";
 import { getAllProducts } from "../services/product.api";
 import { createSale } from "../services/sale.api";
 import { useAuth } from "../context/AuthContext";
-import { getAllSales } from "../services/sale.api";
 
 const POSPage = () => {
   const { user, logout } = useAuth();
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showClearCartModal, setShowClearCartModal] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -123,14 +121,16 @@ const POSPage = () => {
     return calculateSubtotal();
   };
 
-  // Limpiar carrito
   const clearCart = () => {
     if (cart.length > 0) {
-      if (window.confirm("¿Deseas vaciar el carrito?")) {
-        setCart([]);
-        toast.info("Carrito vaciado");
-      }
+      setShowClearCartModal(true);
     }
+  };
+
+  const confirmClearCart = () => {
+    setCart([]);
+    setShowClearCartModal(false);
+    toast.info("Carrito vaciado");
   };
 
   // Procesar pago
@@ -552,6 +552,27 @@ const POSPage = () => {
           </Button>
           <Button variant="success" onClick={confirmCheckout}>
             ✓ Confirmar Venta
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal
+        show={showClearCartModal}
+        onHide={() => setShowClearCartModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Vaciar Carrito</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>¿Deseas vaciar todo el carrito de compras?</Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowClearCartModal(false)}
+          >
+            Cancelar
+          </Button>
+          <Button variant="danger" onClick={confirmClearCart}>
+            Vaciar
           </Button>
         </Modal.Footer>
       </Modal>

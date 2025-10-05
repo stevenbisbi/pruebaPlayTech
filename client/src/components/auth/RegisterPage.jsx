@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Form, Button, Card, Container } from "react-bootstrap";
+import { Form, Button, Card, Container, Alert } from "react-bootstrap";
 import {
   register as registerUser,
   updateUser,
@@ -51,7 +51,9 @@ export function RegisterPage() {
       navigate("/admin/users");
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || "Error al guardar usuario");
+      <Alert>
+        {error.response?.data?.message || "Error al guardar usuario"}
+      </Alert>;
     }
   });
 

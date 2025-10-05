@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Form, Button, Container, Card, Spinner } from "react-bootstrap";
+import { Form, Button, Container, Card, Spinner, Alert } from "react-bootstrap";
 import {
   createProduct,
   updateProduct,
@@ -47,7 +47,7 @@ export function ProductForm() {
       navigate("/admin/products");
     } catch (error) {
       console.error(error);
-      alert("Error al guardar el producto");
+      <Alert>Error al guardar el producto</Alert>;
     }
   };
 

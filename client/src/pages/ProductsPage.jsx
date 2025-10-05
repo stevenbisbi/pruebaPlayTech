@@ -1,28 +1,47 @@
+import { useState } from "react";
 import { getAllProducts, deleteProduct } from "../services/product.api.js";
 import { useFetch } from "../hooks/useFetch.js";
-import { Spinner, Alert, Row, Col, Button, Container } from "react-bootstrap";
+import {
+  Spinner,
+  Alert,
+  Row,
+  Col,
+  Button,
+  Container,
+  Modal,
+} from "react-bootstrap";
 import { ProductCard } from "../components/products/ProductCard";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { toast } from "react-hot-toast";
+import { Header } from "../components/common/Header.jsx";
 
 export function ProductsPage() {
   const productFetch = useFetch(getAllProducts);
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const onDelete = async (product) => {
-    const confirmDelete = window.confirm(
-      `¿Seguro que quieres eliminar "${product.name}"?`
-    );
-    if (!confirmDelete) return;
+  // Modal de confirmación
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+
+  const onDelete = (product) => {
+    setProductToDelete(product);
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    setShowConfirm(false);
+    if (!productToDelete) return;
 
     try {
-      await deleteProduct(product._id, { user: user._id });
-      alert("Producto eliminado");
+      await deleteProduct(productToDelete._id, { user: user._id });
+      toast.success("Producto eliminado");
       productFetch.triggerReload();
+      setProductToDelete(null);
     } catch (error) {
       console.error(error);
-      alert("Error al eliminar el producto");
+      toast.error("Error al eliminar el producto");
     }
   };
 
@@ -52,24 +71,44 @@ export function ProductsPage() {
   }
 
   return (
-    <Container className="py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Inventario</h1>
-        <Button
-          variant="success"
-          onClick={() => navigate("/admin/product/create")}
-        >
-          Crear producto
-        </Button>
-      </div>
+    <>
+      <Header title="Inventario" />
+      <Container className="py-4">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <Button
+            variant="success"
+            onClick={() => navigate("/admin/product/create")}
+          >
+            Crear producto
+          </Button>
+        </div>
 
-      <Row className="g-4">
-        {productFetch.data.map((item) => (
-          <Col xs={12} sm={6} md={4} lg={3} key={item._id}>
-            <ProductCard item={item} onEdit={onEdit} onDelete={onDelete} />
-          </Col>
-        ))}
-      </Row>
-    </Container>
+        <Row className="g-4">
+          {productFetch.data.map((item) => (
+            <Col xs={12} sm={6} md={4} lg={3} key={item._id}>
+              <ProductCard item={item} onEdit={onEdit} onDelete={onDelete} />
+            </Col>
+          ))}
+        </Row>
+      </Container>
+
+      {/* Modal de Confirmación */}
+      <Modal show={showConfirm} onHide={() => setShowConfirm(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirmar Eliminación</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          ¿Seguro que quieres eliminar <strong>{productToDelete?.name}</strong>?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowConfirm(false)}>
+            Cancelar
+          </Button>
+          <Button variant="danger" onClick={confirmDelete}>
+            Eliminar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 }
