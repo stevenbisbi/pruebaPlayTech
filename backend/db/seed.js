@@ -4,6 +4,7 @@ import bcryptjs from "bcryptjs";
 import User from "../src/models/user.model.js";
 import Product from "../src/models/product.model.js";
 import dotenv from "dotenv";
+import Sale from "../src/models/sale.model.js";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ const seedDatabase = async () => {
     // Limpiar colecciones existentes
     await User.deleteMany({});
     await Product.deleteMany({});
+    await Sale.deleteMany({});
     console.log("🗑️  Colecciones limpiadas");
 
     // Crear usuarios
