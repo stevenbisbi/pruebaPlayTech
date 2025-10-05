@@ -18,18 +18,34 @@ export const handleValidationErrors = (req, res, next) => {
 
 export const validateStock = async (req, res, next) => {
   const products = req.body.products;
-  for (const item of products) {
-    const productFound = await Product.findById(item.product);
-    if (!productFound) {
-      return res
-        .status(404)
-        .json({ message: `Product with ID ${item.id} not found` });
-    }
-    if (item.quantity > productFound.stock) {
-      return res
-        .status(400)
-        .json({ message: `Invalid quantity for product ${productFound.name}` });
-    }
+
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    return res.status(400).json({
+      message: "La venta debe incluir al menos un producto",
+    });
   }
-  next();
+
+  try {
+    for (const item of products) {
+      const productFound = await Product.findById(item.product);
+
+      if (!productFound) {
+        return res.status(404).json({
+          message: `Producto con ID ${item.product} no encontrado`,
+        });
+      }
+
+      if (item.quantity > productFound.stock) {
+        return res.status(400).json({
+          message: `Stock insuficiente para ${productFound.name}. Disponible: ${productFound.stock}, Solicitado: ${item.quantity}`,
+        });
+      }
+    }
+    next();
+  } catch (error) {
+    console.error("Error en validateStock:", error);
+    res.status(500).json({
+      message: "Error al validar el stock",
+    });
+  }
 };

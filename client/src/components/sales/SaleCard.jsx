@@ -12,7 +12,6 @@ export function SaleCard({ sale }) {
         <Card.Title className="mb-3 text-warning fw-bold">
           Venta #{sale._id || sale.id}
         </Card.Title>
-
         <Card.Text>
           <strong>Cajero:</strong> {sale.user?.username || "N/A"}
         </Card.Text>
@@ -26,19 +25,21 @@ export function SaleCard({ sale }) {
 
         <Card.Subtitle className="mb-2 text-muted fw-semibold">
           Productos
+          {console.log(sale)}
         </Card.Subtitle>
         <ListGroup variant="flush">
-          {sale.products?.length > 0 ? (
-            sale.products.map((item, idx) => (
+          {(sale.products || []).length > 0 ? (
+            (sale.products || []).map((p, idx) => (
               <ListGroup.Item
                 key={idx}
                 className="d-flex justify-content-between align-items-center px-0"
               >
                 <span>
-                  {item.product?.name || "Producto"} x{item.quantity}
+                  {p.productName || p.product?.name || "Producto Eliminado"} x{" "}
+                  {p.quantity}
                 </span>
                 <Badge bg="success" pill>
-                  ${item.total?.toLocaleString("es-CO")}
+                  ${p.total?.toLocaleString("es-CO") || 0}
                 </Badge>
               </ListGroup.Item>
             ))
