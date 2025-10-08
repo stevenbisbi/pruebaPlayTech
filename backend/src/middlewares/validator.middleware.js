@@ -28,6 +28,7 @@ export const validateStock = async (req, res, next) => {
   try {
     for (const item of products) {
       const productFound = await Product.findById(item.product);
+      console.log(productFound);
 
       if (!productFound) {
         return res.status(404).json({

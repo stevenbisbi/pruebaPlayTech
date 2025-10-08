@@ -3,23 +3,33 @@ import Product from "../models/product.model.js";
 
 export const getSales = async (req, res) => {
   try {
-    const user = req.user; // viene de authRequired
+    const user = req.user;
 
-    // Filtro según el rol
-    const filter = user.role === "cajero" ? { user: user.id } : {};
-
-    // Solo admin o cajero pueden consultar
-    if (!["cajero", "administrador"].includes(user.role)) {
-      return res.status(403).json({ message: "Acceso denegado" });
+    if (user.role == "cajero") {
+      const sales = await Sale.find({ user: user.id });
+      return res.json(sales);
     }
 
-    // Buscar ventas (ya no necesitamos poblar products.product)
-    const sales = await Sale.find(filter).populate("user", "username role");
-
+    const sales = await Sale.find();
     res.json(sales);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al obtener las ventas" });
+  }
+};
+
+// 🔍 Obtener venta por ID
+export const getSale = async (req, res) => {
+  try {
+    const sale = await Sale.findById(req.params.id);
+    if (!sale) {
+      return res.status(404).json({ message: "Venta no encontrada" });
+    }
+
+    res.json(sale);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al obtener la venta" });
   }
 };
 
@@ -58,31 +68,9 @@ export const createSale = async (req, res) => {
 
     const saleSaved = await newSale.save();
 
-    // Solo populamos usuario, no productos
-    await saleSaved.populate("user", "username role");
-
     res.json(saleSaved);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al crear la venta" });
-  }
-};
-
-// 🔍 Obtener venta por ID
-export const getSale = async (req, res) => {
-  try {
-    const sale = await Sale.findById(req.params.id).populate(
-      "user",
-      "username role"
-    );
-
-    if (!sale) {
-      return res.status(404).json({ message: "Venta no encontrada" });
-    }
-
-    res.json(sale);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error al obtener la venta" });
   }
 };

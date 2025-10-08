@@ -6,10 +6,6 @@ import path from "path";
 
 export const generateDailyReport = async (req, res) => {
   try {
-    if (req.user.role !== "administrador") {
-      return res.status(403).json({ message: "Acceso denegado" });
-    }
-
     const today = new Date();
     const start = new Date(today.setHours(0, 0, 0, 0));
     const end = new Date(today.setHours(23, 59, 59, 999));
@@ -85,7 +81,9 @@ export const generateDailyReport = async (req, res) => {
       .fontSize(12)
       .fillColor("#000")
       .text(`Número de transacciones: ${totalTransactions}`);
-    doc.text(`Total general de ingresos: $${totalRevenue.toFixed(2)}`);
+    doc.text(
+      `Total general de ingresos: $${totalRevenue.toLocaleString("es-CO")}`
+    );
 
     doc.moveDown();
 
@@ -126,7 +124,7 @@ export const generateDailyReport = async (req, res) => {
         .fillColor("#000")
         .text(p.producto, itemX, y)
         .text(p.cantidadVendida, qtyX, y)
-        .text(`$${p.totalVendido.toFixed(2)}`, totalX, y);
+        .text(`$${p.totalVendido.toLocaleString("es-CO")}`, totalX, y);
       y += 20;
     });
 

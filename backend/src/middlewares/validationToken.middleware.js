@@ -7,12 +7,12 @@ export const authRequired = (req, res, next) => {
     return res.status(401).json({ message: "No token, autorización denegada" });
   }
 
-  jwt.verify(token, TOKEN_SECRET, (err, user) => {
+  jwt.verify(token, TOKEN_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).json({ message: "Token inválido" });
     }
 
-    req.user = user;
+    req.user = decoded;
     next();
   });
 };

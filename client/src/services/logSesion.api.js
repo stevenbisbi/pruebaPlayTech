@@ -1,3 +1,3 @@
 import axiosClient from "./axiosClient";
 
-export const getAllLogs = () => axiosClient.get("/Logs/");
+export const getAllLogs = () => axiosClient.get("/logSesions/");

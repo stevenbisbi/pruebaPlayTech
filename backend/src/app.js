@@ -5,6 +5,7 @@ import cors from "cors";
 
 import authRoutes from "./routes/auth.routes.js";
 import { authRequired } from "./middlewares/validationToken.middleware.js";
+import { validateRoleAdmin } from "./middlewares/validateRole.middleware.js";
 import productRoutes from "./routes/product.routes.js";
 import saleRoutes from "./routes/sale.routes.js";
 import userRoutes from "./routes/user.routes.js";
@@ -23,14 +24,11 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
 
-app.use("/api/v1", authRoutes);
-app.use("/api/v1", authRequired, userRoutes);
-app.use("/api/v1", authRequired, productRoutes);
-app.use("/api/v1", authRequired, saleRoutes);
-app.use("/api/v1", authRequired, logSesionRoutes);
-app.use("/api/v1/reports", authRequired, reportRoutes);
-
-import expressListEndpoints from "express-list-endpoints";
-console.log(expressListEndpoints(app));
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/products", authRequired, productRoutes);
+app.use("/api/v1/users", authRequired, validateRoleAdmin, userRoutes);
+app.use("/api/v1/sales", authRequired, saleRoutes);
+app.use("/api/v1/logSesions", authRequired, logSesionRoutes);
+app.use("/api/v1/reports", authRequired, validateRoleAdmin, reportRoutes);
 
 export default app;

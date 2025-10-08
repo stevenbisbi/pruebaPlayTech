@@ -15,12 +15,14 @@ import {
   Spinner,
   Modal,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { getAllProducts } from "../services/product.api";
 import { createSale } from "../services/sale.api";
 import { useAuth } from "../context/AuthContext";
 
 const POSPage = () => {
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);

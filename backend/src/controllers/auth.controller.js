@@ -27,12 +27,11 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { username, password } = req.body;
-
   try {
+    const { username, password } = req.body;
+
     const userFound = await User.findOne({ username });
 
-    // Si el usuario no existe → registrar intento fallido
     if (!userFound) {
       await LogSesion.create({
         username,
@@ -41,10 +40,8 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Usuario no encontrado" });
     }
 
-    // Verificar contraseña
     const isMatch = await bcrypt.compare(password, userFound.password);
 
-    // Si la contraseña no coincide → registrar intento fallido
     if (!isMatch) {
       await LogSesion.create({
         username,
@@ -52,24 +49,13 @@ export const login = async (req, res) => {
       });
       return res.status(400).json({ message: "Contraseña incorrecta" });
     }
-
-    // Si el login es exitoso → registrar intento exitoso
-    await LogSesion.create({
-      username: userFound.username,
-      isAutenticated: true,
-    });
-
     // Crear token
     const token = await createJwtToken({
       id: userFound._id,
       role: userFound.role,
     });
 
-    res.cookie("token", token, {
-      httpOnly: true, // el frontend no puede acceder directamente
-      secure: true, // solo HTTPS en producción
-      sameSite: "none", // necesario si tu frontend y backend están en dominios distintos
-    });
+    res.cookie("token", token);
     res.json({
       id: userFound._id,
       username: userFound.username,
