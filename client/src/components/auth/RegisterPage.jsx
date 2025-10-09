@@ -1,5 +1,4 @@
 import { useForm } from "react-hook-form";
-import { useAuth } from "../../context/AuthContext.jsx";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Form, Button, Card, Container, Alert } from "react-bootstrap";
@@ -12,7 +11,6 @@ import {
 export function RegisterPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user: loggedUser } = useAuth();
 
   const {
     register,

@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 
 import { downloadDailyReport } from "../services/report.api";
 import { getAllProducts } from "../services/product.api";
 import { getAllSales } from "../services/sale.api";
 import { useAuth } from "../context/AuthContext";
+import { useFetch } from "../hooks/useFetch";
 
 export const DashBoardPage = () => {
   const { user, logout } = useAuth();
 
-  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalProducts: 0,
     todaySales: 0,
@@ -20,19 +20,13 @@ export const DashBoardPage = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  const productFetch = useFetch(getAllProducts);
+  const saleFetch = useFetch(getAllSales);
 
-  const fetchDashboardData = async () => {
-    setLoading(true);
+  function dashboard() {
     try {
-      const [productsRes, salesRes] = await Promise.all([
-        getAllProducts(),
-        getAllSales(),
-      ]);
-      const products = productsRes.data;
-      const sales = salesRes.data;
+      const products = productFetch.data;
+      const sales = saleFetch.data;
 
       const today = new Date();
       const start = new Date(today.setHours(0, 0, 0, 0));
@@ -56,10 +50,14 @@ export const DashBoardPage = () => {
     } catch (error) {
       console.error("Error al cargar dashboard:", error);
       toast.error("Error cargando datos del dashboard");
-    } finally {
-      setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    if (!productFetch.loading && !saleFetch.loading) {
+      dashboard();
+    }
+  }, [productFetch.data, saleFetch.data]);
 
   const handleDownloadReport = async (format) => {
     try {
@@ -87,11 +85,15 @@ export const DashBoardPage = () => {
     toast.success("Sesión cerrada exitosamente");
   };
 
-  if (loading) {
+  if (productFetch.loading || saleFetch.loading) {
     return (
-      <Container className="mt-5 text-center">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-3">Cargando dashboard...</p>
+      <Container className="d-flex justify-content-center align-items-center vh-100">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Cargando...</span>
+          </div>
+          <p className="mt-3">cargando sesión...</p>
+        </div>
       </Container>
     );
   }
