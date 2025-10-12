@@ -8,7 +8,6 @@ export function SaleCard({ sale }) {
       className="shadow-sm mb-3 border-0 sale-card"
       style={{ transition: "transform 0.2s" }}
     >
-      {console.log(sale)}
       <Card.Body>
         <Card.Title className="mb-3 text-warning fw-bold">
           Venta #{sale._id || sale.id}

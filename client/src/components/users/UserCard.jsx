@@ -22,7 +22,7 @@ export function UserCard({ userItem, onEdit, onDelete }) {
         <Card.Text className="text-truncate mb-3" title={userItem.updatedAt}>
           Último login:{" "}
           {userItem.updatedAt
-            ? new Date(userItem.updatedAt).toLocaleString()
+            ? new Date(userItem.updatedAt).toLocaleString("es-CO")
             : "N/A"}
         </Card.Text>
 

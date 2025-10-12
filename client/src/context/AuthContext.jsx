@@ -1,6 +1,10 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
-import { verifyToken, logout as logoutApi } from "../services/auth.api";
+import {
+  verifyToken,
+  logout as logoutApi,
+  loginUser,
+} from "../services/auth.api";
 
 const AuthContext = createContext();
 
@@ -11,13 +15,17 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Llamar esto cuando el usuario hace login
-  const login = (userData) => {
-    setUser(userData);
+  // 🔹 Cerrar sesión
+  // ✅ login debe encargarse de hacer la petición a la API y guardar la respuesta
+  const login = async (credentials) => {
+    const res = await loginUser(credentials);
+    const data = res.data;
+    console.log(data);
+    setUser(data);
     setIsAuthenticated(true);
+    return data; // para que el componente pueda usar la info del usuario
   };
 
-  // 🔹 Cerrar sesión
   const logout = async () => {
     await logoutApi();
     setUser(null);

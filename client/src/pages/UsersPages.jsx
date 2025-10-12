@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { deleteUser, getAllUsers } from "../services/auth.api.js";
+import { getAllLogs } from "../services/logSesion.api.js";
 import { useFetch } from "../hooks/useFetch.js";
 import {
   Spinner,
@@ -18,6 +19,7 @@ import { Header } from "../components/common/Header.jsx";
 
 export function UsersPages() {
   const userFetch = useFetch(getAllUsers);
+  const logsFetch = useFetch(getAllLogs);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -85,6 +87,7 @@ export function UsersPages() {
         <Row className="g-4">
           {userFetch.data.map((item) => (
             <Col xs={12} sm={6} md={4} lg={3} key={item._id}>
+              {}
               <UserCard userItem={item} onEdit={onEdit} onDelete={onDelete} />
             </Col>
           ))}

@@ -1,8 +1,7 @@
 // src/components/auth/LoginPage.jsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Form, Button, Container, Card, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../services/auth.api";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 
@@ -12,29 +11,18 @@ export function LoginPage() {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
-  const { login, isAuthenticated, user, loading } = useAuth();
-
-  useEffect(() => {
-    if (!loading && isAuthenticated && user) {
-      if (user.role === "administrador") navigate("/admin/dashboard");
-      else if (user.role === "cajero") navigate("/staff/dashboard");
-      else navigate("/");
-    }
-  }, [isAuthenticated, user, loading, navigate]);
+  const { login, loading } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
     try {
-      const res = await loginUser({ username, password });
-      const data = res.data;
-      login(data);
+      const data = await login({ username, password }); // 🔹 el login ya maneja la API
       toast.success("Inicio de sesión exitoso");
 
       if (data.role === "administrador") navigate("/admin/dashboard");
       else if (data.role === "cajero") navigate("/staff/dashboard");
-      else navigate("/");
     } catch (err) {
       const message =
         err.response?.data?.message || "Error en el inicio de sesión";

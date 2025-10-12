@@ -49,6 +49,13 @@ export const login = async (req, res) => {
       });
       return res.status(400).json({ message: "Contraseña incorrecta" });
     }
+
+    // Si el login es exitoso → registrar intento exitoso
+    await LogSesion.create({
+      username: userFound.username,
+      isAutenticated: true,
+    });
+
     // Crear token
     const token = await createJwtToken({
       id: userFound._id,
@@ -71,6 +78,7 @@ export const logout = (req, res) => {
 };
 export const profile = async (req, res) => {
   try {
+    console.log("profile");
     const userFound = await User.findById(req.user.id);
     if (!userFound)
       return res.status(404).json({ message: "Usuario no encontrado" });

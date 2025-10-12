@@ -6,11 +6,14 @@ export const getSales = async (req, res) => {
     const user = req.user;
 
     if (user.role == "cajero") {
-      const sales = await Sale.find({ user: user.id });
+      const sales = await Sale.find({ user: user.id }).populate(
+        "user",
+        "username role"
+      );
       return res.json(sales);
     }
 
-    const sales = await Sale.find();
+    const sales = await Sale.find().populate("user", "username role");
     res.json(sales);
   } catch (error) {
     console.error(error);

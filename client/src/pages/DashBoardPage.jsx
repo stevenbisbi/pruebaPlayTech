@@ -79,8 +79,8 @@ export const DashBoardPage = () => {
   };
 
   const handleLogout = () => {
-    logout();
     localStorage.removeItem("user");
+    logout();
     navigate("/", { replace: true });
     toast.success("Sesión cerrada exitosamente");
   };
@@ -155,24 +155,31 @@ export const DashBoardPage = () => {
 
         <Col xs={12} md={6} lg={3} className="mb-3">
           <Card className="h-100 border-0 shadow-sm">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                  <Card.Subtitle className="text-muted mb-2">
-                    Usuarios
-                  </Card.Subtitle>
-                  <Button
-                    as={Link}
-                    to="/admin/users"
-                    variant="link"
-                    size="sm"
-                    className="p-0 text-decoration-none"
-                    style={{ color: "#6f42c1" }}
-                  >
-                    Ver usuarios →
-                  </Button>
+            <Card.Body className="d-flex flex-column justify-content-between">
+              <div>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <Card.Subtitle className="text-muted mb-2">
+                      Usuarios
+                    </Card.Subtitle>
+                    <small className="text-muted">
+                      registros, logs y demás
+                    </small>
+                  </div>
+                  <div style={{ fontSize: "3rem" }}>👥</div>
                 </div>
-                <div style={{ fontSize: "3rem" }}>👥</div>
+              </div>
+
+              <div className="mt-auto">
+                <Button
+                  as={Link}
+                  to="/admin/users"
+                  variant="link"
+                  size="sm"
+                  className="p-0 text-decoration-none color-purple"
+                >
+                  Ver usuarios →
+                </Button>
               </div>
             </Card.Body>
           </Card>
@@ -212,7 +219,7 @@ export const DashBoardPage = () => {
                   <Card.Subtitle className="text-muted mb-2">
                     Ingresos Hoy
                   </Card.Subtitle>
-                  <h2 className="mb-0" style={{ color: "#6f42c1" }}>
+                  <h2 className="mb-0 color-purple">
                     {new Intl.NumberFormat("es-CO", {
                       style: "currency",
                       currency: "COP",
