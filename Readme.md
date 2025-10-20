@@ -230,6 +230,7 @@ cd pruebaplaytech
 # 2. Instalar dependencias del backend
 cd backend
 npm install
+npm run dev
 
 # 3. Configurar variables de entorno
 ```
