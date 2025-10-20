@@ -30,7 +30,4 @@ app.use("/api/v1", authRequired, saleRoutes);
 app.use("/api/v1", authRequired, logSesionRoutes);
 app.use("/api/v1/reports", authRequired, reportRoutes);
 
-import expressListEndpoints from "express-list-endpoints";
-console.log(expressListEndpoints(app));
-
 export default app;

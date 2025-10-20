@@ -9,5 +9,17 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      const html = document.documentElement;
+      const btn = document.getElementById("toggleTheme");
+
+      btn.addEventListener("click", () => {
+        const current = html.getAttribute("data-bs-theme");
+        html.setAttribute(
+          "data-bs-theme",
+          current === "light" ? "dark" : "light"
+        );
+      });
+    </script>
   </body>
 </html>
