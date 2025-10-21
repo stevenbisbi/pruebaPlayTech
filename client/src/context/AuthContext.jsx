@@ -5,6 +5,7 @@ import {
   logout as logoutApi,
   loginUser,
 } from "../services/auth.api";
+import { useLocation } from "react-router-dom";
 
 const AuthContext = createContext();
 
@@ -15,12 +16,11 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Cerrar sesión
-  // ✅ login debe encargarse de hacer la petición a la API y guardar la respuesta
+  const location = useLocation();
+
   const login = async (credentials) => {
     const res = await loginUser(credentials);
     const data = res.data;
-    console.log(data);
     setUser(data);
     setIsAuthenticated(true);
     return data; // para que el componente pueda usar la info del usuario
@@ -37,9 +37,11 @@ export function AuthProvider({ children }) {
     const checkLogin = async () => {
       try {
         const res = await verifyToken(); // hace GET /profile
+        if (!res) return;
         setUser(res.data);
         setIsAuthenticated(true);
       } catch (error) {
+        console.error("Error verifying token:", error);
         setUser(null);
         setIsAuthenticated(false);
       } finally {
@@ -47,8 +49,13 @@ export function AuthProvider({ children }) {
       }
     };
 
-    checkLogin();
-  }, []);
+    // ❌ No hacemos check en la página de login
+    if (location.pathname !== "/") {
+      checkLogin();
+    } else {
+      setLoading(false); // Si estamos en login, ya no estamos cargando
+    }
+  }, [location.pathname]);
 
   return (
     <AuthContext.Provider

@@ -8,7 +8,8 @@ export const loginUser = (data) =>
 export const verifyToken = () =>
   axiosClient.get("/auth/profile", { withCredentials: true });
 
-export const logout = () => axiosClient.post("/auth/logout");
+export const logout = () =>
+  axiosClient.post("/auth/logout", { withCredentials: true });
 
 export const getAllUsers = () => axiosClient.get("/users");
 

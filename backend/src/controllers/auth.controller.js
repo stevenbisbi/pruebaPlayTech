@@ -62,7 +62,15 @@ export const login = async (req, res) => {
       role: userFound.role,
     });
 
-    res.cookie("token", token);
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProd, // 🔹 solo true en producción
+      sameSite: isProd ? "none" : "lax", // 🔹 lax funciona en localhost
+      maxAge: 60 * 60 * 1000, // 1 hora
+    });
+
     res.json({
       id: userFound._id,
       username: userFound.username,
@@ -73,7 +81,13 @@ export const login = async (req, res) => {
   }
 };
 export const logout = (req, res) => {
-  res.cookie("token", "", { expires: new Date(0) });
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    expires: new Date(0),
+  });
+
   return res.sendStatus(200);
 };
 export const profile = async (req, res) => {

@@ -1,32 +1,33 @@
 // src/components/auth/LoginPage.jsx
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Form, Button, Container, Card, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 
 export function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const navigate = useNavigate();
   const { login, loading } = useAuth();
+  const [serverError, setServerError] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-
+  const onSubmit = async (data) => {
+    setServerError(null);
     try {
-      const data = await login({ username, password }); // 🔹 el login ya maneja la API
+      const res = await login(data);
       toast.success("Inicio de sesión exitoso");
 
-      if (data.role === "administrador") navigate("/admin/dashboard");
-      else if (data.role === "cajero") navigate("/staff/dashboard");
+      if (res.role === "administrador") navigate("/admin/dashboard");
+      else if (res.role === "cajero") navigate("/staff/dashboard");
     } catch (err) {
       const message =
         err.response?.data?.message || "Error en el inicio de sesión";
-      setError(message);
+      setServerError(message);
       toast.error(message);
     }
   };
@@ -57,19 +58,24 @@ export function LoginPage() {
         <Card.Body>
           <h3 className="text-center mb-4">Iniciar Sesión</h3>
 
-          {error && <Alert variant="danger">{error}</Alert>}
+          {serverError && <Alert variant="danger">{serverError}</Alert>}
 
-          <Form onSubmit={handleSubmit}>
+          <Form onSubmit={handleSubmit(onSubmit)}>
             <Form.Group className="mb-3" controlId="formUsername">
               <Form.Label>Usuario</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Ingresa tu usuario"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
+                {...register("username", {
+                  required: "El usuario es obligatorio",
+                })}
                 autoComplete="username"
               />
+              {errors.username && (
+                <Form.Text className="text-danger">
+                  {errors.username.message}
+                </Form.Text>
+              )}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formPassword">
@@ -77,11 +83,16 @@ export function LoginPage() {
               <Form.Control
                 type="password"
                 placeholder="Ingresa tu contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                {...register("password", {
+                  required: "La contraseña es obligatoria",
+                })}
                 autoComplete="current-password"
               />
+              {errors.password && (
+                <Form.Text className="text-danger">
+                  {errors.password.message}
+                </Form.Text>
+              )}
             </Form.Group>
 
             <Button variant="primary" type="submit" className="w-100">
